@@ -6,6 +6,7 @@ box-sizing: border-box;
   margin: 0 auto;
   margin-top: 50px;
   padding: 10px;
+  overflow-x: hidden;
 }
 button {
   width: 100px;
