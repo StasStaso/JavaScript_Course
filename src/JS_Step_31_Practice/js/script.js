@@ -251,7 +251,7 @@ window.addEventListener("DOMContentLoaded", () => {
         display: block;
         margin: 0 auto;
       `;
-      form.insertAdjacentElement('afterend', statusMessage);
+      form.insertAdjacentElement("afterend", statusMessage);
 
       const request = new XMLHttpRequest();
       request.open("POST", "server.php");
@@ -306,4 +306,18 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   //#endregion
+
+  fetch("https://jsonplaceholder.typicode.com/todos/50")
+    .then((response) => response.json())
+    .then((json) => console.log(json));
+
+  fetch("https://jsonplaceholder.typicode.com/posts", {
+    method: "POST",
+    body: JSON.stringify({ name: "Alex" }),
+    headers: {
+      "Content-type": "application/json",
+    },
+  })
+    .then((response) => response.json())
+    .then((json) => console.log(json));
 });
