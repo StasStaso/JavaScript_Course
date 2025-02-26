@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сучасний TODO</title>
+    <style>
+        :root {
+            --main-dark: #2B2B29;
+            --accent: #6C63FF;
+            --text: #FFFFFF;
+            --secondary: #353533;
+            --surface: #1E1E1C;
+            --danger: #FF5D6C;
+            --success: #35D0BA;
+            --shadow: rgba(0, 0, 0, 0.2);
+            --border-radius: 12px;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
+        }
+        
+        body {
+            background-color: var(--surface);
+            color: var(--text);
+            height: 100vh;
+            padding: 2rem;
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; /* Забороняємо скрол на сторінці */
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 700px;
+            height: 80vh; /* Обмежуємо висоту контейнера */
+            background-color: var(--main-dark);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: 0 10px 30px var(--shadow);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        h1 {
+            font-weight: 800;
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, var(--accent), var(--success));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: inline-block;
+        }
+        
+        .title-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-shrink: 0; /* Запобігає стисканню заголовка */
+        }
+        
+        .date-display {
+            font-size: 1rem;
+            color: #AAA;
+            font-weight: 500;
+        }
+        
+        .todo-input-container {
+            position: relative;
+            margin-bottom: 2rem;
+            flex-shrink: 0; /* Запобігає стисканню поля вводу */
+        }
+        
+        .todo-input {
+            width: 100%;
+            padding: 1.2rem 1.5rem;
+            background-color: var(--secondary);
+            color: var(--text);
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            outline: none;
+            box-shadow: 0 4px 10px var(--shadow);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .todo-input:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px var(--shadow);
+        }
+        
+        .add-btn {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        
+        .add-btn:hover {
+            background-color: #7E77FF;
+        }
+        
+        .add-btn:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+        
+        .todos-container {
+            flex: 1; /* Займає весь доступний простір */
+            overflow: hidden; /* Приховуємо переповнення */
+            position: relative;
+        }
+        
+        .todo-list {
+            list-style-type: none;
+            overflow-y: auto; /* Додаємо вертикальний скрол */
+            height: 100%; /* Займає всю висоту батьківського контейнера */
+            padding-right: 10px; /* Місце для скролбару */
+        }
+        
+        /* Стилізація скролбара */
+        .todo-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .todo-list::-webkit-scrollbar-track {
+            background: var(--secondary);
+            border-radius: 10px;
+        }
+        
+        .todo-list::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 10px;
+        }
+        
+        .todo-list::-webkit-scrollbar-thumb:hover {
+            background: #7E77FF;
+        }
+        
+        .todo-item {
+            background-color: var(--secondary);
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: var(--border-radius);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .todo-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: linear-gradient(to bottom, var(--accent), var(--success));
+            border-radius: 2px 0 0 2px;
+        }
+        
+        .todo-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px var(--shadow);
+        }
+        
+        .todo-content {
+            flex: 1;
+            padding-right: 1rem;
+        }
+        
+        .todo-text {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            word-break: break-word;
+            font-weight: 500;
+        }
+        
+        .todo-time {
+            font-size: 0.8rem;
+            color: #AAA;
+            display: flex;
+            align-items: center;
+        }
+        
+        .todo-time::before {
+            content: '⏱️';
+            margin-right: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .delete-btn {
+            background-color: transparent;
+            color: var(--danger);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        
+        .delete-btn:hover {
+            background-color: rgba(255, 93, 108, 0.1);
+        }
+        
+        .delete-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .empty-list {
+            text-align: center;
+            color: #AAA;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+        
+        .empty-list-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        .empty-list-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .container {
+                padding: 1.5rem;
+                height: 90vh;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title-container">
+            <h1>Мої Завдання</h1>
+            <div id="current-date" class="date-display"></div>
+        </div>
+        
+        <div class="todo-input-container">
+            <input type="text" id="todo-input" class="todo-input" placeholder="Додайте нове завдання...">
+            <button id="add-btn" class="add-btn">+</button>
+        </div>
+        
+        <div class="todos-container">
+            <ul id="todo-list" class="todo-list">
+                <!-- Тут будуть задачі -->
+            </ul>
+            
+            <div id="empty-list" class="empty-list">
+                <div class="empty-list-icon">📝</div>
+                <div class="empty-list-text">Немає завдань. Створіть своє перше завдання!</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Оновлення поточної дати
+            const currentDateElement = document.getElementById('current-date');
+            const updateDate = () => {
+                const now = new Date();
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                currentDateElement.textContent = now.toLocaleDateString('uk-UA', options);
+            };
+            updateDate();
+            
+            // Отримання елементів DOM
+            const todoInput = document.getElementById('todo-input');
+            const addBtn = document.getElementById('add-btn');
+            const todoList = document.getElementById('todo-list');
+            const emptyList = document.getElementById('empty-list');
+            
+            // Завантаження задач із localStorage
+            let todos = JSON.parse(localStorage.getItem('todos')) || [];
+            
+            // Оновлення відображення задач
+            function renderTodos() {
+                todoList.innerHTML = '';
+                
+                if (todos.length === 0) {
+                    emptyList.style.display = 'flex';
+                } else {
+                    emptyList.style.display = 'none';
+                    
+                    todos.forEach((todo, index) => {
+                        const todoItem = document.createElement('li');
+                        todoItem.classList.add('todo-item');
+                        
+                        // Форматування дати
+                        const date = new Date(todo.time);
+                        const formattedDate = `${date.toLocaleDateString('uk-UA')} ${date.toLocaleTimeString('uk-UA', {hour: '2-digit', minute:'2-digit'})}`;
+                        
+                        todoItem.innerHTML = `
+                            <div class="todo-content">
+                                <div class="todo-text">${todo.text}</div>
+                                <div class="todo-time">${formattedDate}</div>
+                            </div>
+                            <button class="delete-btn" data-index="${index}">✖</button>
+                        `;
+                        
+                        todoList.appendChild(todoItem);
+                    });
+                }
+            }
+            
+            // Збереження задач в localStorage
+            function saveTodos() {
+                localStorage.setItem('todos', JSON.stringify(todos));
+            }
+            
+            // Додавання нової задачі
+            function addTodo() {
+                const text = todoInput.value.trim();
+                
+                if (text) {
+                    const newTodo = {
+                        text: text,
+                        time: Date.now()
+                    };
+                    
+                    todos.unshift(newTodo); // Додаємо нові завдання на початок
+                    saveTodos();
+                    renderTodos();
+                    
+                    todoInput.value = '';
+                    todoInput.focus();
+                }
+            }
+            
+            // Видалення задачі
+            function deleteTodo(index) {
+                todos.splice(index, 1);
+                saveTodos();
+                renderTodos();
+            }
+            
+            // Додавання тестових даних для демонстрації скролу
+            function addTestData() {
+                if (todos.length === 0) {
+                    for (let i = 1; i <= 10; i++) {
+                        todos.push({
+                            text: `Тестове завдання ${i} для демонстрації скролу`,
+                            time: Date.now() - (i * 3600000) // Різний час для кожного завдання
+                        });
+                    }
+                    saveTodos();
+                    renderTodos();
+                }
+            }
+            
+            // Обробники подій
+            addBtn.addEventListener('click', addTodo);
+            
+            todoInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addTodo();
+                }
+            });
+            
+            todoList.addEventListener('click', (e) => {
+                if (e.target.classList.contains('delete-btn')) {
+                    const index = parseInt(e.target.dataset.index);
+                    deleteTodo(index);
+                }
+            });
+            
+            // Початкове відображення задач
+            renderTodos();
+            
+            // Розкоментуйте наступний рядок, щоб додати тестові дані для демонстрації скролу
+            addTestData();
+        });
+    </script>
+</body>
+</html>
